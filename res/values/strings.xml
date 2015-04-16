@@ -1,4 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Cataloguer</string>
+
+    <string name="header_catalogue">Catalogues</string>
+
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_subtitle">Subtitle</string>
+
+    <string name="labelAuthors">Author(s):</string>
+    <string name="labelPublisher">Publisher:</string>
+    <string name="labelPublishDate">Published:</string>
+    <string name="labelPageCount">pages</string>
+
+    <string name="menu_addCatalogue">New Catalogue</string>
+    <string name="menu_edit">Edit</string>
+    <string name="menu_delete">Delete</string>
+    <string name="menu_scan">Scan</string>
+    <string name="menu_sortAuthor">Sort: Author</string>
+    <string name="menu_sortTitle">Sort: Title</string>
+
+    <string name="no_data">No Data</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="imageContent">Book Image</string>
+
+    <string name="info_logo">Application Logo</string>
+    <string name="info_thumbnail">Thumbnail Image</string>
 </resources>
