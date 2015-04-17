@@ -44,7 +44,7 @@ public class MyActivity extends Activity {
         }
 
         cataloguesView = (ListView) findViewById(R.id.lv_catalogues);
-        cataloguesView.setEmptyView(findViewById(R.id.tv_emptyList));
+        cataloguesView.setEmptyView(findViewById(R.id.rl_empty));
 
         fillList();
     }

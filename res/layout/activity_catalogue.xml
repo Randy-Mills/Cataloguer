@@ -6,15 +6,25 @@
 
     <ListView android:id="@+id/lv_catalogueItems"
               android:layout_width="match_parent"
-              android:layout_height="fill_parent"></ListView>
+              android:layout_height="fill_parent"
+              android:background="@drawable/gradient"></ListView>
 
-    <TextView android:id="@+id/tv_emptyList"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="@string/no_data"
-              android:textSize="20dp"
-              android:textStyle="bold"
-              android:visibility="gone"
-              android:gravity="center" />
+    <RelativeLayout android:id="@+id/rl_empty"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/gradient"
+                    android:visibility="gone">
+
+        <TextView android:id="@+id/tv_emptyList"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="@string/no_data"
+                  android:textSize="24sp"
+                  android:textStyle="bold"
+                  android:layout_centerInParent="true"
+                  android:textColor="@color/grey"
+                  android:paddingBottom="10dp"/>
+
+    </RelativeLayout>
 
 </RelativeLayout>

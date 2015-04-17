@@ -24,6 +24,7 @@
     <string name="login">Login</string>
     <string name="register">Register</string>
     <string name="imageContent">Book Image</string>
+    <string name="add_catalogue">Add Catalogue</string>
 
     <string name="info_logo">Application Logo</string>
     <string name="info_thumbnail">Thumbnail Image</string>

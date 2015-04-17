@@ -7,25 +7,45 @@
     <TextView android:id="@+id/tv_lvTitle"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:textSize="20dp"
+              android:textSize="24sp"
               android:textStyle="bold"
               android:text="@string/header_catalogue"
-              android:layout_marginBottom="5dp" />
+              android:layout_marginBottom="5dp"
+              android:paddingStart="10dp"
+              android:paddingEnd="10dp"
+              android:paddingTop="5dp"/>
 
     <ListView android:id="@+id/lv_catalogues"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_below="@id/tv_lvTitle"></ListView>
+              android:layout_below="@id/tv_lvTitle"
+              android:background="@drawable/gradient"></ListView>
 
-    <TextView android:id="@+id/tv_emptyList"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="@string/no_data"
-              android:textSize="20dp"
-              android:textStyle="bold"
-              android:visibility="gone"
-              android:gravity="center"
-              android:layout_below="@id/tv_lvTitle" />
+    <RelativeLayout android:id="@+id/rl_empty"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/tv_lvTitle"
+                    android:background="@drawable/gradient"
+                    android:visibility="gone">
+
+        <TextView android:id="@+id/tv_emptyList"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="@string/no_data"
+                  android:textSize="24sp"
+                  android:textStyle="bold"
+                  android:layout_centerInParent="true"
+                  android:textColor="@color/grey"
+                  android:paddingBottom="10dp"/>
+
+        <Button android:id="@+id/btn_add_catalogue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_catalogue"
+                android:layout_centerInParent="true"
+                android:layout_below="@id/tv_emptyList"/>
+
+    </RelativeLayout>
 
 </RelativeLayout>
 

@@ -57,9 +57,9 @@ public class CatalogueActivity extends Activity {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
                 if(e == null) {
-                    ListView listView = (ListView) findViewById(R.id.lv_catalogueItems);
                     catalogueItemAdapter = new CatalogueItemAdapter(list);
-                    listView.setEmptyView(findViewById(R.id.tv_emptyList));
+                    ListView listView = (ListView) findViewById(R.id.lv_catalogueItems);
+                    listView.setEmptyView(findViewById(R.id.rl_empty));
                     listView.setAdapter(catalogueItemAdapter);
 
                     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
