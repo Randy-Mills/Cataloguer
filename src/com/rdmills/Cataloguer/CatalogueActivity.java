@@ -10,9 +10,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.view.ViewGroup;
+import android.widget.*;
 import com.parse.*;
 import org.json.JSONArray;
 
@@ -26,11 +25,14 @@ public class CatalogueActivity extends Activity {
     private String catalogueId;
     private Intent detailActivity;
     private CatalogueItemAdapter catalogueItemAdapter;
+    private DataFetcher dataFetcher;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalogue);
+
+        dataFetcher = new DataFetcher(this);
 
         detailActivity = new Intent(this, DetailsActivity.class);
 
@@ -74,7 +76,7 @@ public class CatalogueActivity extends Activity {
                                 try {
                                     authors[i] = authorFetch.getString(i);
                                 } catch (Exception e) {
-                                    //Do nothing
+                                    Log.d("Cataloguer", "Error retrieving authors: " + e.getMessage());
                                 }
                             }
                             detailActivity.putExtra("id", temp.getObjectId());
@@ -87,6 +89,8 @@ public class CatalogueActivity extends Activity {
                             startActivity(detailActivity);
                         }
                     });
+                } else {
+                    Log.d("Cataloguer", "ParseException: " + e.getMessage());
                 }
             }
         });
@@ -97,7 +101,6 @@ public class CatalogueActivity extends Activity {
             if(resultCode == RESULT_OK) {
                 String contents = intent.getStringExtra("SCAN_RESULT");
                 Log.d("Cataloguer", "Contents: " + contents);
-                DataFetcher dataFetcher = new DataFetcher(this);
                 dataFetcher.execute(contents + "", catalogueId);
             } else if (resultCode == RESULT_CANCELED) {
                 Log.d("Cataloguer", "RESULT_CANCELED");
@@ -129,21 +132,56 @@ public class CatalogueActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public AlertDialog confirmDialog(String cIdIn, Book bookIn) {
+    public AlertDialog confirmDialog(String cIdIn, Book[] booksIn) {
         TextView info = new TextView(this);
+        RelativeLayout rl = new RelativeLayout(this);
+        RelativeLayout.LayoutParams params1 = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 300);
+
         info.setPadding(5, 5, 5, 5);
-        final Book book = bookIn;
+        final Book[] books = booksIn;
         final String cId = cIdIn;
-        info.setText(Html.fromHtml("Please confirm that <i>" + book.getTitle() + "</i> was scanned and should be added to the current catalogue"));
+
+        info.setText(Html.fromHtml("Please select the scanned book from the list below or confirm that the book is missing."));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Verify Scan");
-        builder.setView(info);
         builder.setCancelable(false);
+
+        final RadioGroup radioButtons = new RadioGroup(this);
+
+        for(Book book : books) {
+            RadioButton radioButton = new RadioButton(this);
+            radioButton.setText(book.getTitle());
+            radioButtons.addView(radioButton);
+        }
+
+        ScrollView scrollView = new ScrollView(this);
+
+        RadioButton radioButton = new RadioButton(this);
+        radioButton.setText("The book isn't there!");
+        radioButtons.addView(radioButton);
+
+        rl.addView(info, params1);
+        info.setId(-1);
+        scrollView.addView(radioButtons);
+        params2.addRule(RelativeLayout.BELOW, info.getId());
+        rl.addView(scrollView, params2);
+
+        builder.setView(rl);
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
         builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
+                int radioId = radioButtons.getCheckedRadioButtonId()-1;
+                Book book = books[radioId];
+                final String title = book.getTitle();
                 ParseObject newBook = new ParseObject("Book");
                 newBook.put("catalogue_id", cId);
+                newBook.put("amazon_id", book.getAmazonId());
                 newBook.put("title", book.getTitle());
                 newBook.put("subtitle", book.getSubtitle());
                 newBook.put("authors", book.getAuthors());
@@ -156,7 +194,7 @@ public class CatalogueActivity extends Activity {
                 newBook.saveInBackground(new SaveCallback() {
                     public void done(ParseException e) {
                         if (e == null) {
-                            Log.d("Cataloguer", "Great Success");
+                            Log.d("Cataloguer", title + " successfully added");
                             fillList();
                         } else {
                             Log.d("Cataloguer", "Error: " + e);
@@ -164,11 +202,6 @@ public class CatalogueActivity extends Activity {
                     }
                 });
                 dialog.dismiss();
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.cancel();
             }
         });
 

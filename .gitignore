@@ -18,3 +18,6 @@ out/
 
 # Vim
 *.sw*
+
+#others
+temp/

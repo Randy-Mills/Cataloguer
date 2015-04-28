@@ -7,6 +7,7 @@ import org.json.JSONArray;
  */
 public class Book {
     private int catalogueId;
+    private String amazonId;
     private String title;
     private String subtitle;
     private JSONArray authors;
@@ -18,7 +19,7 @@ public class Book {
 
     public Book(String title, String subtitle, JSONArray authors,
                 String thumbnail, String isbn, String publisher,
-                String publishedDate, int pageCount) {
+                String publishedDate, int pageCount, String amazonId) {
         this.title = title;
         this.subtitle = subtitle;
         this.authors = authors;
@@ -27,6 +28,7 @@ public class Book {
         this.publisher = publisher;
         this.publishedDate = publishedDate;
         this.pageCount = pageCount;
+        this.amazonId = amazonId;
     }
 
     public int getCatalogueId() {
@@ -35,6 +37,14 @@ public class Book {
 
     public void setCatalogueId(int catalogueId) {
         this.catalogueId = catalogueId;
+    }
+
+    public String getAmazonId() {
+        return amazonId;
+    }
+
+    public void setAmazonId(String amazonId) {
+        this.amazonId = amazonId;
     }
 
     public String getTitle() {

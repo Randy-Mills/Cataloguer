@@ -3,6 +3,7 @@ package com.rdmills.Cataloguer;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.parse.ParseObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,55 +40,60 @@ public class DataFetcher extends AsyncTask<String, Void, JSONObject> {
 
     protected void onPostExecute(JSONObject result) {
         try {
-            JSONObject vi = result.getJSONArray("items").getJSONObject(0).getJSONObject("volumeInfo");
+            JSONArray booksData = result.getJSONArray("items");
+            JSONObject volumeInfo;
+            String amazonId;
 
-            final String title = vi.getString("title");
-
+            String title;
             String subtitle;
-            try {
-                subtitle = vi.getString("subtitle");
-            } catch (JSONException je) {
-                subtitle = "";
-            }
             String image;
-            try {
-                image = (String)vi.getJSONObject("imageLinks").get("smallThumbnail");
-            } catch (JSONException je) {
-                image = "";
-            }
-
             JSONArray authors;
-            try {
-                authors = vi.getJSONArray("authors");
-            } catch (JSONException je) {
-                authors = new JSONArray();
-            }
-
             String publisher;
-            try {
-                publisher = vi.getString("publisher");
-            } catch (JSONException je) {
-                publisher = "";
-            }
-
             String publishedDate;
-            try {
-                publishedDate = vi.getString("publishedDate");
-            } catch (JSONException je) {
-                publishedDate = "";
-            }
-
             int pageCount;
-            try {
-                pageCount = vi.getInt("pageCount");
-            } catch (JSONException je) {
-                pageCount = 0;
+            String fullIsbn;
+
+            Book[] books = new Book[booksData.length()];
+
+            for(int i=0; i<booksData.length();i++) {
+                amazonId = booksData.getJSONObject(i).getString("id");
+                volumeInfo = booksData.getJSONObject(i).getJSONObject("volumeInfo");
+
+                title = volumeInfo.getString("title");
+                subtitle = volumeInfo.optString("subtitle");
+
+                try {
+                    image = volumeInfo.getJSONObject("imageLinks").optString("smallThumbnail");
+                } catch (JSONException je) {
+                    image = "";
+                }
+
+                try {
+                    JSONArray identifiers = volumeInfo.getJSONArray("industryIdentifiers");
+                    fullIsbn = identifiers.getJSONObject(0).optString("identifier") + "|" +
+                            identifiers.getJSONObject(1).optString("identifier");
+                } catch (JSONException je) {
+                    fullIsbn = isbn;
+                }
+
+                authors = volumeInfo.optJSONArray("authors");
+                publisher = volumeInfo.optString("publisher");
+                publishedDate = volumeInfo.optString("publishedDate");
+                pageCount = volumeInfo.optInt("pageCount");
+
+                books[i] = new Book(title,subtitle,
+                                    authors,image,
+                                    fullIsbn,publisher,
+                                    publishedDate,pageCount,
+                                    amazonId);
             }
 
-            Book book = new Book(title,subtitle,authors,image,isbn,publisher,publishedDate,pageCount);
-            parent.confirmDialog(cId, book);
+            parent.confirmDialog(cId, books);
+        } catch (JSONException e) {
+            Log.d("Cataloguer", "JSONException: " + e.getMessage());
         } catch (Exception e) {
-            Log.d("Cataloguer", "Error: " + e);
+            Log.d("Cataloguer", "Exception: " + e.getMessage());
         }
+
     }
 }

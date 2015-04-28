@@ -68,6 +68,8 @@ public class MyActivity extends Activity {
                             startActivity(catalogueActivity);
                         }
                     });
+                } else {
+                    Log.d("Cataloguer",  "ParseException: " + e.getMessage());
                 }
             }
         });
