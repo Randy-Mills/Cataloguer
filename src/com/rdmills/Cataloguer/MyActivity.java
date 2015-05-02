@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import com.parse.*;
@@ -22,6 +23,7 @@ public class MyActivity extends Activity {
     private Intent catalogueActivity;
     private SharedPreferences settings;
     private ListView cataloguesView;
+    private Button addCatalogueButton;
 
     /**
      * Called when the activity is first created.
@@ -45,6 +47,13 @@ public class MyActivity extends Activity {
 
         cataloguesView = (ListView) findViewById(R.id.lv_catalogues);
         cataloguesView.setEmptyView(findViewById(R.id.rl_empty));
+        addCatalogueButton = (Button) findViewById(R.id.btn_add_catalogue);
+        addCatalogueButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createDialog();
+            }
+        });
 
         fillList();
     }

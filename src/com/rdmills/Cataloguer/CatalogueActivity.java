@@ -135,10 +135,10 @@ public class CatalogueActivity extends Activity {
     public AlertDialog confirmDialog(String cIdIn, Book[] booksIn) {
         TextView info = new TextView(this);
         RelativeLayout rl = new RelativeLayout(this);
-        RelativeLayout.LayoutParams params1 = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 300);
+        RelativeLayout.LayoutParams params1 = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, 300);
 
-        info.setPadding(5, 5, 5, 5);
+        info.setId(View.generateViewId());
         final Book[] books = booksIn;
         final String cId = cIdIn;
 
@@ -163,10 +163,10 @@ public class CatalogueActivity extends Activity {
         radioButtons.addView(radioButton);
 
         rl.addView(info, params1);
-        info.setId(-1);
         scrollView.addView(radioButtons);
         params2.addRule(RelativeLayout.BELOW, info.getId());
-        rl.addView(scrollView, params2);
+        scrollView.setLayoutParams(params2);
+        rl.addView(scrollView);
 
         builder.setView(rl);
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

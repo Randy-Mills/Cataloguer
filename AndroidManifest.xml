@@ -12,9 +12,10 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
-    <uses-sdk android:minSdkVersion="21"/>
+    <uses-sdk android:minSdkVersion="10"/>
 
-    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
+    <application android:label="@string/app_name"
+                 android:icon="@drawable/ic_launcher">
         <activity android:name="MyActivity"
                   android:label="@string/app_name"
                   android:screenOrientation="portrait">
@@ -23,8 +24,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".CatalogueActivity"/>
-        <activity android:name=".LoginActivity"/>
-        <activity android:name=".DetailsActivity"/>
+        <activity android:name=".CatalogueActivity"
+                  android:screenOrientation="portrait"/>
+        <activity android:name=".LoginActivity"
+                  android:screenOrientation="portrait"/>
+        <activity android:name=".DetailsActivity"
+                  android:screenOrientation="portrait"/>
     </application>
 </manifest>
