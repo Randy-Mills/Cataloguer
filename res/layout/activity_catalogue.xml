@@ -7,7 +7,7 @@
     <ListView android:id="@+id/lv_catalogueItems"
               android:layout_width="match_parent"
               android:layout_height="fill_parent"
-              android:background="@drawable/gradient"></ListView>
+              android:background="@drawable/gradient" />
 
     <RelativeLayout android:id="@+id/rl_empty"
                     android:layout_width="fill_parent"

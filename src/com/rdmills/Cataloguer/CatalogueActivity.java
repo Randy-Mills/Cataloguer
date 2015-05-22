@@ -27,7 +27,7 @@ public class CatalogueActivity extends Activity {
     private CatalogueItemAdapter catalogueItemAdapter;
     private DataFetcher dataFetcher;
 
-    @Override
+    /*@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalogue);
@@ -53,9 +53,9 @@ public class CatalogueActivity extends Activity {
 
     private void fillList() {
         ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Book");
-        query.whereContains("catalogue_id", catalogueId);
-        query.whereEqualTo("active", true);
-        query.findInBackground(new FindCallback<ParseObject>() {
+        query.whereContains("catalogue_id", catalogueId)
+             .whereEqualTo("active", true)
+             .findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
                 if(e == null) {
@@ -176,7 +176,7 @@ public class CatalogueActivity extends Activity {
         });
         builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                int radioId = radioButtons.getCheckedRadioButtonId()-1;
+                int radioId = radioButtons.getCheckedRadioButtonId()-2;
                 Book book = books[radioId];
                 final String title = book.getTitle();
                 ParseObject newBook = new ParseObject("Book");
@@ -187,10 +187,12 @@ public class CatalogueActivity extends Activity {
                 newBook.put("authors", book.getAuthors());
                 newBook.put("thumbnail", book.getThumbnail());
                 newBook.put("isbn", book.getIsbn());
+                newBook.put("scan_isbn", book.getScanIsbn());
                 newBook.put("publisher", book.getPublisher());
                 newBook.put("publishedDate", book.getPublishedDate());
                 newBook.put("pageCount", book.getPageCount());
                 newBook.put("active", true);
+                newBook.put("quantity", 1);
                 newBook.saveInBackground(new SaveCallback() {
                     public void done(ParseException e) {
                         if (e == null) {
@@ -208,5 +210,5 @@ public class CatalogueActivity extends Activity {
         builder.show();
 
         return builder.create();
-    }
+    }*/
 }

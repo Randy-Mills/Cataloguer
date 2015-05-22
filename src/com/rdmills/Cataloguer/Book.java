@@ -13,18 +13,20 @@ public class Book {
     private JSONArray authors;
     private String thumbnail;
     private String isbn;
+    private String scanIsbn;
     private String publisher;
     private String publishedDate;
     private int pageCount;
 
     public Book(String title, String subtitle, JSONArray authors,
-                String thumbnail, String isbn, String publisher,
+                String thumbnail, String isbn, String scanIsbn, String publisher,
                 String publishedDate, int pageCount, String amazonId) {
         this.title = title;
         this.subtitle = subtitle;
         this.authors = authors;
         this.thumbnail = thumbnail;
         this.isbn = isbn;
+        this.scanIsbn = scanIsbn;
         this.publisher = publisher;
         this.publishedDate = publishedDate;
         this.pageCount = pageCount;
@@ -85,6 +87,14 @@ public class Book {
 
     public void setIsbn(String isbn) {
         this.isbn = isbn;
+    }
+
+    public String getScanIsbn() {
+        return scanIsbn;
+    }
+
+    public void setScanIsbn(String scanIsbn) {
+        this.scanIsbn = scanIsbn;
     }
 
     public String getPublisher() {

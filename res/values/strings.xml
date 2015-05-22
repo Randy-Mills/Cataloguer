@@ -2,7 +2,10 @@
 <resources>
     <string name="app_name">Cataloguer</string>
 
-    <string name="header_catalogue">Catalogues</string>
+    <string name="action_bar_search">Scan Search</string>
+    <string name="action_text_search">Text Search</string>
+
+    <string name="header_catalogue">Your Catalogues</string>
 
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>

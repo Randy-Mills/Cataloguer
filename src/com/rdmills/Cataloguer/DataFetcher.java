@@ -1,5 +1,6 @@
 package com.rdmills.Cataloguer;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -14,10 +15,9 @@ import org.json.JSONObject;
 public class DataFetcher extends AsyncTask<String, Void, JSONObject> {
 
     private String isbn;
-    private String cId;
-    private CatalogueActivity parent;
+    private MyActivity parent;
 
-    public DataFetcher(CatalogueActivity parent) {
+    public DataFetcher(MyActivity parent) {
         this.parent = parent;
     }
 
@@ -25,7 +25,6 @@ public class DataFetcher extends AsyncTask<String, Void, JSONObject> {
     protected JSONObject doInBackground(String... params) {
         isbn = params[0];
         String url = "https://www.googleapis.com/books/v1/volumes?q=isbn" + isbn;
-        cId = params[1];
 
         JSONObject result = new JSONObject();
 
@@ -83,12 +82,12 @@ public class DataFetcher extends AsyncTask<String, Void, JSONObject> {
 
                 books[i] = new Book(title,subtitle,
                                     authors,image,
-                                    fullIsbn,publisher,
+                                    fullIsbn, isbn, publisher,
                                     publishedDate,pageCount,
                                     amazonId);
             }
 
-            parent.confirmDialog(cId, books);
+            parent.confirmDialog(books);
         } catch (JSONException e) {
             Log.d("Cataloguer", "JSONException: " + e.getMessage());
         } catch (Exception e) {

@@ -47,25 +47,13 @@ public class LoginActivity extends Activity {
 
                 password = encodePassword(password);
 
-                ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("User");
-                query.whereEqualTo("active", true);
-                query.whereEqualTo("userName", username);
-                query.whereEqualTo("password", password);
-                query.findInBackground(new FindCallback<ParseObject>() {
+                ParseUser.logInInBackground(username, password, new LogInCallback() {
                     @Override
-                    public void done(List<ParseObject> list, ParseException e) {
-                        if(e == null) {
-                            ParseObject temp;
-                            if(list.size() > 0) {
-                                temp = list.get(0);
-                                if(temp.isDataAvailable()) {
-                                    goHome(temp.getObjectId());
-                                }
-                            }
-
-                            feedbackField.setText("User not found. Please check the details you provided");
+                    public void done(ParseUser parseUser, ParseException e) {
+                        if(parseUser != null) {
+                            goHome(parseUser.getObjectId());
                         } else {
-                            feedbackField.setText("An error occurred. Please try again.");
+                            feedbackField.setText("User not found. Please check the details you provided");
                         }
                     }
                 });
@@ -127,17 +115,22 @@ public class LoginActivity extends Activity {
         builder.setPositiveButton("Register", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 if(repeat.getText().toString().equals(passwordField.getText().toString())) {
-                    ParseObject newUser = new ParseObject("User");
-                    newUser.put("userName", usernameField.getText().toString());
-                    newUser.put("password", encodePassword(passwordField.getText().toString()));
-                    newUser.put("active", true);
-                    newUser.saveInBackground(new SaveCallback() {
+                    ParseUser user = new ParseUser();
+                    user.setUsername(usernameField.getText().toString());
+                    user.setPassword(encodePassword(passwordField.getText().toString()));
+                    user.setEmail(usernameField.getText().toString());
+                    user.put("active", true);
+
+                    user.signUpInBackground(new SignUpCallback() {
+                        @Override
                         public void done(ParseException e) {
                             if (e == null) {
                                 Log.d("Cataloguer", "New User added successfully");
                                 feedbackField.setText("Registration Complete");
+                                loginBtn.callOnClick();
                             } else {
                                 Log.d("Cataloguer", "Error: " + e);
+                                feedbackField.setText("Error during registration, please try again.");
                             }
                         }
                     });
