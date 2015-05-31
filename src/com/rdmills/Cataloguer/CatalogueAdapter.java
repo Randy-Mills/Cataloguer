@@ -27,6 +27,10 @@ public class CatalogueAdapter extends BaseAdapter {
         return data.size();
     }
 
+    public List<ParseObject> getData() {
+        return data;
+    }
+
     @Override
     public ParseObject getItem(int position) {
         return data.get(position);

@@ -1,16 +1,12 @@
 package com.rdmills.Cataloguer;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.*;
 import com.parse.*;
 import org.json.JSONArray;
@@ -25,14 +21,11 @@ public class CatalogueActivity extends Activity {
     private String catalogueId;
     private Intent detailActivity;
     private CatalogueItemAdapter catalogueItemAdapter;
-    private DataFetcher dataFetcher;
 
-    /*@Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalogue);
-
-        dataFetcher = new DataFetcher(this);
 
         detailActivity = new Intent(this, DetailsActivity.class);
 
@@ -96,18 +89,6 @@ public class CatalogueActivity extends Activity {
         });
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if(requestCode == 0) {
-            if(resultCode == RESULT_OK) {
-                String contents = intent.getStringExtra("SCAN_RESULT");
-                Log.d("Cataloguer", "Contents: " + contents);
-                dataFetcher.execute(contents + "", catalogueId);
-            } else if (resultCode == RESULT_CANCELED) {
-                Log.d("Cataloguer", "RESULT_CANCELED");
-            }
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.catalogue, menu);
@@ -117,12 +98,7 @@ public class CatalogueActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if(id == R.id.menu_scan) {
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.setPackage("com.google.zxing.client.android");
-            intent.putExtra("SCAN_MODE", "PRODUCT_MODE");
-            startActivityForResult(intent, 0);
-        } else if (id == R.id.menu_sortAuthor) {
+        if (id == R.id.menu_sortAuthor) {
             catalogueItemAdapter.sortData(1);
             catalogueItemAdapter.notifyDataSetChanged();
         } else if (id == R.id.menu_sortTitle) {
@@ -131,84 +107,4 @@ public class CatalogueActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-    public AlertDialog confirmDialog(String cIdIn, Book[] booksIn) {
-        TextView info = new TextView(this);
-        RelativeLayout rl = new RelativeLayout(this);
-        RelativeLayout.LayoutParams params1 = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, 300);
-
-        info.setId(View.generateViewId());
-        final Book[] books = booksIn;
-        final String cId = cIdIn;
-
-        info.setText(Html.fromHtml("Please select the scanned book from the list below or confirm that the book is missing."));
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Verify Scan");
-        builder.setCancelable(false);
-
-        final RadioGroup radioButtons = new RadioGroup(this);
-
-        for(Book book : books) {
-            RadioButton radioButton = new RadioButton(this);
-            radioButton.setText(book.getTitle());
-            radioButtons.addView(radioButton);
-        }
-
-        ScrollView scrollView = new ScrollView(this);
-
-        RadioButton radioButton = new RadioButton(this);
-        radioButton.setText("The book isn't there!");
-        radioButtons.addView(radioButton);
-
-        rl.addView(info, params1);
-        scrollView.addView(radioButtons);
-        params2.addRule(RelativeLayout.BELOW, info.getId());
-        scrollView.setLayoutParams(params2);
-        rl.addView(scrollView);
-
-        builder.setView(rl);
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.cancel();
-            }
-        });
-        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                int radioId = radioButtons.getCheckedRadioButtonId()-2;
-                Book book = books[radioId];
-                final String title = book.getTitle();
-                ParseObject newBook = new ParseObject("Book");
-                newBook.put("catalogue_id", cId);
-                newBook.put("amazon_id", book.getAmazonId());
-                newBook.put("title", book.getTitle());
-                newBook.put("subtitle", book.getSubtitle());
-                newBook.put("authors", book.getAuthors());
-                newBook.put("thumbnail", book.getThumbnail());
-                newBook.put("isbn", book.getIsbn());
-                newBook.put("scan_isbn", book.getScanIsbn());
-                newBook.put("publisher", book.getPublisher());
-                newBook.put("publishedDate", book.getPublishedDate());
-                newBook.put("pageCount", book.getPageCount());
-                newBook.put("active", true);
-                newBook.put("quantity", 1);
-                newBook.saveInBackground(new SaveCallback() {
-                    public void done(ParseException e) {
-                        if (e == null) {
-                            Log.d("Cataloguer", title + " successfully added");
-                            fillList();
-                        } else {
-                            Log.d("Cataloguer", "Error: " + e);
-                        }
-                    }
-                });
-                dialog.dismiss();
-            }
-        });
-
-        builder.show();
-
-        return builder.create();
-    }*/
 }

@@ -10,7 +10,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.JsonWriter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,12 +20,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MyActivity extends Activity {
 
+    private AlertDialog.Builder alertDialogBuilder;
     private Intent catalogueActivity;
     private SharedPreferences settings;
     private ListView cataloguesView;
@@ -57,6 +56,8 @@ public class MyActivity extends Activity {
 
         dataFetcher = new DataFetcher(this);
 
+        alertDialogBuilder = new AlertDialog.Builder(this);
+
         connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
@@ -72,7 +73,7 @@ public class MyActivity extends Activity {
             addCatalogueButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    createDialog();
+                    createCatalogue();
                 }
             });
 
@@ -109,7 +110,7 @@ public class MyActivity extends Activity {
                     try {
                         JSONObject temp = localCollection.getJSONObject(i);
                         if (temp.getString("isbn").contains(contents) || temp.getString("scan_isbn").equals(contents)) {
-                            confirmLocal(temp.getString("scan_isbn"), temp.getString("title"), temp.getInt("quantity"));
+                            createConfirmLocal(temp.getString("scan_isbn"), temp.getString("title"), temp.getInt("quantity"));
                             return;
                         }
                     } catch (JSONException e) {
@@ -232,26 +233,31 @@ public class MyActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if(id == R.id.menu_addCatalogue) {
-            createDialog();
+            createCatalogue();
         }
         return super.onOptionsItemSelected(item);
     }
 
     //Dialogs
-    public AlertDialog createDialog() {
+
+    /**
+     * Builds a New Catalogue Dialog that prompts users for information to create a Catalogue object on Parse.
+     *
+     * @return Dialog box with users directions to create new Catalogue object.
+     */
+    public AlertDialog createCatalogue() {
         final EditText name = new EditText(this);
         name.setText("New Catalogue");
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Catalogue Name");
-        builder.setView(name);
-        builder.setCancelable(true);
-        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setTitle("Catalogue Name");
+        alertDialogBuilder.setView(name);
+        alertDialogBuilder.setCancelable(true);
+        alertDialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ParseObject newCatalogue = new ParseObject("Catalogue");
                 newCatalogue.put("user_id", settings.getString("id", ""));
                 newCatalogue.put("title", name.getText().toString());
-                newCatalogue.put("type", "Books");
+                newCatalogue.put("type", "Books"); //Default to books
                 newCatalogue.saveInBackground(new SaveCallback() {
                     @Override
                     public void done(ParseException e) {
@@ -267,12 +273,18 @@ public class MyActivity extends Activity {
             }
         });
 
-        builder.show();
+        alertDialogBuilder.show();
 
-        return builder.create();
+        return alertDialogBuilder.create();
     }
 
-    public AlertDialog confirmDialog(Book[] booksIn) {
+    /**
+     * Builds a Selector Dialog that prompts users to select the proper book from the list of isbn sharing options.
+     * Once an option has been selected users can continue on to add the book to a catalogue.
+     *
+     * @return Dialog box with users directions to create new Catalogue object.
+     */
+    public AlertDialog createBookSelector(Book[] booksIn) {
         TextView info = new TextView(this);
         RelativeLayout rl = new RelativeLayout(this);
         RelativeLayout.LayoutParams params1 = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -281,11 +293,10 @@ public class MyActivity extends Activity {
         info.setId(View.generateViewId());
         final Book[] books = booksIn;
 
-        info.setText(Html.fromHtml("Select the correct book."));
+        alertDialogBuilder.setTitle("Book Found");
+        alertDialogBuilder.setCancelable(false);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Book Found");
-        builder.setCancelable(false);
+        info.setText(Html.fromHtml("Select the correct book."));
 
         final RadioGroup radioButtons = new RadioGroup(this);
 
@@ -307,17 +318,17 @@ public class MyActivity extends Activity {
         scrollView.setLayoutParams(params2);
         rl.addView(scrollView);
 
-        builder.setView(rl);
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setView(rl);
+        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.cancel();
             }
         });
-        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 int radioId = radioButtons.getCheckedRadioButtonId()-2;
                 Book book = books[radioId];
-                final String title = book.getTitle();
+
                 ParseObject newBook = new ParseObject("Book");
                 newBook.put("catalogue_id", "");
                 newBook.put("amazon_id", book.getAmazonId());
@@ -332,26 +343,80 @@ public class MyActivity extends Activity {
                 newBook.put("pageCount", book.getPageCount());
                 newBook.put("active", true);
                 newBook.put("quantity", 1);
-                newBook.saveInBackground(new SaveCallback() {
-                    public void done(ParseException e) {
-                        if (e == null) {
-                            Log.d("Cataloguer", title + " successfully added");
-                            fillList();
-                        } else {
-                            Log.d("Cataloguer", "Error: " + e);
-                        }
-                    }
-                });
+
                 dialog.dismiss();
+
+                if(cataloguesView.getCount() == 1) {
+                    ParseObject catalogue = (ParseObject) cataloguesView.getAdapter().getItem(0);
+                    newBook.put("catalogue_id", catalogue.getObjectId());
+                    saveBook(newBook);
+                } else {
+                    createCatalogueSelector(newBook);
+                }
             }
         });
 
-        builder.show();
+        alertDialogBuilder.show();
 
-        return builder.create();
+        return alertDialogBuilder.create();
     }
 
-    public AlertDialog confirmLocal(final String scanIsbn, String title, int quantity) {
+    private AlertDialog createCatalogueSelector(ParseObject book) {
+        AlertDialog.Builder alertDialogBuilder2 = new AlertDialog.Builder(this);
+        alertDialogBuilder2.setTitle("Select Catalogue");
+
+        final ParseObject newBook = book;
+        final List<ParseObject> catalogues = ((CatalogueAdapter)cataloguesView.getAdapter()).getData();
+
+        TextView info = new TextView(this);
+        RelativeLayout rl = new RelativeLayout(this);
+        RelativeLayout.LayoutParams params1 = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, 300);
+
+        info.setId(View.generateViewId());
+
+        info.setText(Html.fromHtml("Select the catalogue you want to add the book to."));
+
+        final RadioGroup radioButtons = new RadioGroup(this);
+
+        for(ParseObject catalogue : catalogues) {
+            RadioButton radioButton = new RadioButton(this);
+            radioButton.setText(catalogue.getString("title"));
+            radioButtons.addView(radioButton);
+        }
+
+        ScrollView scrollView = new ScrollView(this);
+
+        rl.addView(info, params1);
+        scrollView.addView(radioButtons);
+        params2.addRule(RelativeLayout.BELOW, info.getId());
+        scrollView.setLayoutParams(params2);
+        rl.addView(scrollView);
+
+        alertDialogBuilder2.setView(rl);
+        alertDialogBuilder2.setCancelable(true);
+        alertDialogBuilder2.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+        alertDialogBuilder2.setPositiveButton("Finish", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                int radioId = radioButtons.getCheckedRadioButtonId()-14;
+                System.out.println(radioId);
+                System.out.println(catalogues.get(radioId).getObjectId() + " " + catalogues.get(radioId).getString("title"));
+                newBook.put("catalogue_id", catalogues.get(radioId).getObjectId());
+                saveBook(newBook);
+            }
+        });
+
+        alertDialogBuilder2.show();
+
+        return alertDialogBuilder2.create();
+    }
+
+    public AlertDialog createConfirmLocal(final String scanIsbn, String title, int quantity) {
         final TextView info = new TextView(this);
         info.setPadding(5,5,5,5);
         if(quantity == 1) {
@@ -359,12 +424,11 @@ public class MyActivity extends Activity {
         } else {
             info.setText("You have " + quantity + " copies of " + title + ". To add another copy to your collection click Add.");
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Found Locally");
-        builder.setView(info);
+        alertDialogBuilder.setTitle("Found Locally");
+        alertDialogBuilder.setView(info);
 
-        builder.setCancelable(true);
-        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setCancelable(true);
+        alertDialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("Book");
@@ -391,8 +455,22 @@ public class MyActivity extends Activity {
             }
         });
 
-        builder.show();
+        alertDialogBuilder.show();
 
-        return builder.create();
+        return alertDialogBuilder.create();
+    }
+
+    private void saveBook(ParseObject book) {
+        final String title = book.getString("title");
+        book.saveInBackground(new SaveCallback() {
+            public void done(ParseException e) {
+                if (e == null) {
+                    Log.d("Cataloguer", title + " successfully added");
+                    fillList();
+                } else {
+                    Log.d("Cataloguer", "Error: " + e);
+                }
+            }
+        });
     }
 }

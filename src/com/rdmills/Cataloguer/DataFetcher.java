@@ -1,10 +1,8 @@
 package com.rdmills.Cataloguer;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.parse.ParseObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,7 +85,7 @@ public class DataFetcher extends AsyncTask<String, Void, JSONObject> {
                                     amazonId);
             }
 
-            parent.confirmDialog(books);
+            parent.createBookSelector(books);
         } catch (JSONException e) {
             Log.d("Cataloguer", "JSONException: " + e.getMessage());
         } catch (Exception e) {
